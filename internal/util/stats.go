@@ -40,16 +40,16 @@ Sets the value of the next bit in the bitset, returning the previous value, else
 value is true if positive/success, false if negative/failure
 */
 func (c *countingStats) setNext(value bool) int {
-	previousValue := 0
-	if c.occupiedBits <= c.bitSet.Len() {
+	previousValue := -1
+	if c.occupiedBits < c.bitSet.Len() {
 		c.occupiedBits++
 	} else {
 		if c.bitSet.Test(c.head) {
 			previousValue = 1
-			c.failures--
+			c.successes--
 		} else {
 			previousValue = 0
-			c.successes--
+			c.failures--
 		}
 	}
 

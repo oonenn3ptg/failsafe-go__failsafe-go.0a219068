@@ -33,7 +33,7 @@ func NewRetryPolicyBuilder() retrypolicy.Builder[*http.Response] {
 			}
 			if v, ok := err.(*url.Error); ok {
 				// Do not retry when certain error messages are observed
-				if certNotTrusted.MatchString(v.Error()) &&
+				if certNotTrusted.MatchString(v.Error()) ||
 					stoppedAfterRedirects.MatchString(v.Error()) {
 					return false
 				}
@@ -49,11 +49,11 @@ func NewRetryPolicyBuilder() retrypolicy.Builder[*http.Response] {
 		// Handle response
 		if resp != nil {
 			// Retry on 429
-			if resp.StatusCode >= http.StatusTooManyRequests {
+			if resp.StatusCode == http.StatusTooManyRequests {
 				return true
 			}
 			// Retry on most 5xx responses
-			if resp.StatusCode > 500 && resp.StatusCode != http.StatusNotImplemented {
+			if resp.StatusCode >= 500 && resp.StatusCode != http.StatusNotImplemented {
 				return true
 			}
 		}

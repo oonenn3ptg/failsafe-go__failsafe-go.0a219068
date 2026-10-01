@@ -577,7 +577,7 @@ func (l *adaptiveLimiter[R]) updateLimit(recentRTT float64, inflight int, now ti
 	// Update baseline RTT and calculate the queue size
 	// This is the primary signal that we threshold off of to detect overload
 	baselineRTT := l.baselineRTT.Add(recentRTT)
-	gradient := recentRTT / baselineRTT
+	gradient := baselineRTT / recentRTT
 	queueSize := int(math.Ceil(l.limit * (1 - gradient)))
 
 	// Calculate throughput correlation, throughput CV, and RTT correlation
@@ -615,10 +615,10 @@ func (l *adaptiveLimiter[R]) updateLimit(recentRTT float64, inflight int, now ti
 
 	maxLimit := l.computeMaxLimit(maxInflight)
 	if newLimit > maxLimit {
-		if oldLimit < maxLimit {
+		if oldLimit > maxLimit {
 			direction = "decrease"
 			newLimit = oldLimit - float64(decreaseFunc(int(oldLimit))) // Decrease gradually to avoid noise if inflights fluctuate
-		} else if oldLimit > maxLimit {
+		} else if oldLimit < maxLimit {
 			direction = "increase"
 			newLimit = maxLimit
 		} else {
@@ -645,7 +645,7 @@ func (l *adaptiveLimiter[R]) updateLimit(recentRTT float64, inflight int, now ti
 
 	l.logLimit(direction, reason, newLimit, gradient, queueSize, inflight, recentRTT, baselineRTT, rttCorr, throughput, throughputCorr, throughputCV)
 
-	if uint(oldLimit) == uint(newLimit) && l.onLimitChanged != nil {
+	if uint(oldLimit) != uint(newLimit) && l.onLimitChanged != nil {
 		l.mu.Unlock()
 		l.onLimitChanged(LimitChangedEvent{
 			OldLimit: uint(oldLimit),
@@ -654,7 +654,7 @@ func (l *adaptiveLimiter[R]) updateLimit(recentRTT float64, inflight int, now ti
 		l.mu.Lock()
 	}
 
-	l.semaphore.SetSize(int(oldLimit))
+	l.semaphore.SetSize(int(newLimit))
 	l.limit = newLimit
 }
 

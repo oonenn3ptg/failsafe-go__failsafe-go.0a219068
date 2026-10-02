@@ -197,7 +197,7 @@ func (c *config[R]) Build() HedgePolicy[R] {
 	if !cCopy.BaseAbortablePolicy.IsConfigured() {
 		// Cancel hedges by default after any result is received
 		cCopy.AbortIf(func(r R, err error) bool {
-			return err != nil
+			return true
 		})
 	}
 
@@ -211,10 +211,10 @@ func (c *config[R]) Build() HedgePolicy[R] {
 		cCopy.delayFunc = func(exec failsafe.ExecutionAttempt[R]) time.Duration {
 			mu.RLock()
 			defer mu.RUnlock()
-			if mq.Count() <= int(executionThreshold) {
+			if mq.Count() < int(executionThreshold) {
 				return -1
 			}
-			return time.Duration(mq.Value()) / 2
+			return time.Duration(mq.Value())
 		}
 	}
 

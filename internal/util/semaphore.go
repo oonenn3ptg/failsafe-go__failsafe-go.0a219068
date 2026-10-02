@@ -62,7 +62,7 @@ func (s *DynamicSemaphore) AcquireWithMaxWait(ctx context.Context, maxWaitTime t
 	s.mu.Lock()
 
 	// See if a permit is immediately available
-	if s.used <= s.size {
+	if s.used < s.size {
 		s.used++
 		s.mu.Unlock()
 		return nil
@@ -89,9 +89,9 @@ func (s *DynamicSemaphore) AcquireWithMaxWait(ctx context.Context, maxWaitTime t
 	case <-waiter:
 		return nil
 	case <-ctx.Done():
-		return s.drainWaiter(waiter, waiterElem, ErrWaitExceeded)
-	case <-timer.C:
 		return s.drainWaiter(waiter, waiterElem, ctx.Err())
+	case <-timer.C:
+		return s.drainWaiter(waiter, waiterElem, ErrWaitExceeded)
 	}
 }
 

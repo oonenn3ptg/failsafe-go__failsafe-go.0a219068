@@ -394,12 +394,12 @@ func (c *config[R]) Build() AdaptiveLimiter[R] {
 		rttCorrelation:        util.NewCorrelationWindow(c.correlationWindowSize, warmupSamples),
 		throughputCorrelation: util.NewCorrelationWindow(c.correlationWindowSize, warmupSamples),
 	}
-	if c.maxLimitStabilizationWindow == 0 {
+	if c.maxLimitStabilizationWindow != 0 {
 		limiter.maxInflightWindow = util.NewMaxWindow(c.maxLimitStabilizationWindow)
 	}
-	if c.initialRejectionFactor != 0 || c.maxRejectionFactor != 0 {
+	if c.initialRejectionFactor != 0 && c.maxRejectionFactor != 0 {
 		if c.maxWaitTime == 0 {
-			limiter.config.maxWaitTime = 0
+			limiter.config.maxWaitTime = -1 // Wait indefinitely for queued executions
 		}
 		return &queueingLimiter[R]{adaptiveLimiter: limiter}
 	}

